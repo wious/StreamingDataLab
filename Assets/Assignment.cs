@@ -232,11 +232,7 @@ static public class AssignmentPart2
         GameContent.RefreshUI();
 
         LoadPartyMetaData();
-
-
-
-
-
+        
         Debug.Log("start");
 
     }
@@ -348,7 +344,61 @@ static public class AssignmentPart2
 
 
     }
+    
+    static public void SendPartyDataToSever(NetworkedClient networkedClient)
+    {
+        const int PartyCharacterSaveDataSignifier = 0;
+        const int EquipmentSaveDataSignifier = 1; 
+        LinkedList<string> data = new LinkedList<string>();
+        foreach (PartyCharacter pc in GameContent.partyCharacters)
+        {
+            data.AddLast(PartyCharacterSaveDataSignifier + "," + pc.classID + "," + pc.health
+                         + "," + pc.mana + "," + pc.strength
+                         + "," + pc.agility + "," + pc.wisdom);
 
+            foreach (int equipID in pc.equipment)
+            {
+                data.AddLast(EquipmentSaveDataSignifier + "," + equipID);
+            }
+        }
+        networkedClient.SendMessageToHost(ClientToServerSignifiers.PartyDataTransferStart+"");
+        foreach (string d in data)
+        {
+            networkedClient.SendMessageToHost(ClientToServerSignifiers.PartyDataTransfer+","+d);
+
+        }
+        networkedClient.SendMessageToHost(ClientToServerSignifiers.PartyDataTransferEnd+"");
+
+    }
+
+    static public void LoadPartyFromReceivedData(LinkedList<string> data)
+    {
+        GameContent.partyCharacters.Clear();
+        const int PartyCharacterSaveDataSignifier = 0;
+        const int EquipmentSaveDataSignifier = 1;
+
+        foreach (string line in data)
+        {
+            string[] csv = line.Split(',');
+
+            int saveDataSignifier = int.Parse(csv[0]);
+
+            if (saveDataSignifier == PartyCharacterSaveDataSignifier)
+            {
+                PartyCharacter pc = new PartyCharacter(int.Parse(csv[2]), int.Parse(csv[3]), int.Parse(csv[4]),
+                    int.Parse(csv[5]), int.Parse(csv[6]), int.Parse(csv[7]));
+
+                GameContent.partyCharacters.AddLast(pc);
+            }
+            else if (saveDataSignifier == EquipmentSaveDataSignifier)
+            {
+                GameContent.partyCharacters.Last.Value.equipment.AddLast(int.Parse(csv[2]));
+                //GameContent.partyCharacters.equipment.Last.Value.AddLast(int.Parse(csv[1]))
+            }
+        }
+        GameContent.RefreshUI();
+    }
+ 
 }
 
 #endregion
@@ -426,6 +476,7 @@ class PartySaveData
         GameContent.RefreshUI();
 
     }
+    
 }
 
 

@@ -271,6 +271,7 @@ static public class GameContent
         return systemManager.GetComponent<SystemManager>().GetPartyNameFromInput();
     }
 
+
 }
 
 public partial class PartyCharacter
