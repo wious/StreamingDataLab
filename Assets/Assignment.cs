@@ -50,9 +50,9 @@ public partial class PartyCharacter
 
     public LinkedList<int> equipment;
 
-    public LinkedList<int> affliction;
+   // public LinkedList<int> affliction;
 
-    public LinkedList<int> otherThing;
+  //  public LinkedList<int> otherThing;
 
     //public bool isAntiMasker = true;
 
@@ -80,36 +80,37 @@ public partial class PartyCharacter
 static public class AssignmentPart1
 {
 
-    const int PartyCharacterSaveDataSignifier = 0;
-    const int EquipmentSaveDataSignifier = 1;
+    const int PartyMemberSignifier  = 0;
+    const int EquipmentSignifier = 1;
     const int AfflictionSaveDataSignifier = 2;
+    const int StartOfNewPartyDataSignifier = 3;
 
-
+    private static string path = Application.dataPath + Path.DirectorySeparatorChar + "PartySaveData.txt";
     static public void SavePartyButtonPressed()
     {
 
-        //StreamWriter sw = new StreamWriter(Application.dataPath + Path.DirectorySeparatorChar + "OurBelovedSaveFile.txt");
+        StreamWriter sw = new StreamWriter(path);
 
         //Debug.Log("start of loop");
 
-        //foreach (PartyCharacter pc in GameContent.partyCharacters)
-        //{
+        foreach (PartyCharacter pc in GameContent.partyCharacters)
+        {
 
-        //    sw.WriteLine(PartyCharacterSaveDataSignifier + "," + pc.classID + "," + pc.health 
-        //    + "," + pc.mana + "," + pc.strength
-        //    + "," + pc.agility + "," + pc.wisdom);
-
+        string pcStats = string.Join(",", PartyMemberSignifier, pc.classID, pc.health, pc.mana, pc.strength, pc.agility, pc.wisdom);
+        sw.WriteLine(pcStats);
         //    //pc.equipment
 
-        //    foreach(int equipID in pc.equipment)
-        //    {
-        //        sw.WriteLine(EquipmentSaveDataSignifier + "," + equipID);
-        //    }
+           foreach(int equipID in pc.equipment)
+            {
+                string equipSaveData = string.Join(",", EquipmentSignifier, equipID);
+
+                sw.WriteLine(equipSaveData);
+            }
 
 
-        //}
+        }
 
-        //sw.Close();
+        sw.Close();
 
         //Debug.Log("end of loop");
     }
@@ -118,15 +119,15 @@ static public class AssignmentPart1
     {
 
 
-        string path = Application.dataPath + Path.DirectorySeparatorChar + "OurBelovedSaveFile.txt";
-
+        string path = Application.dataPath + Path.DirectorySeparatorChar + "PartySaveData.txt";
+     
         if (File.Exists(path))
         {
             GameContent.partyCharacters.Clear();
 
             string line = "";
+          
             StreamReader sr = new StreamReader(path);
-
             while ((line = sr.ReadLine()) != null)
             {
                 string[] csv = line.Split(',');
@@ -138,14 +139,14 @@ static public class AssignmentPart1
 
                 int saveDataSignifier = int.Parse(csv[0]);
 
-                if (saveDataSignifier == PartyCharacterSaveDataSignifier)
+                if (saveDataSignifier == PartyMemberSignifier)
                 {
                     PartyCharacter pc = new PartyCharacter(int.Parse(csv[1]), int.Parse(csv[2]), int.Parse(csv[3]),
                         int.Parse(csv[4]), int.Parse(csv[5]), int.Parse(csv[6]));
 
                     GameContent.partyCharacters.AddLast(pc);
                 }
-                else if (saveDataSignifier == EquipmentSaveDataSignifier)
+                else if (saveDataSignifier == EquipmentSignifier)
                 {
                     GameContent.partyCharacters.Last.Value.equipment.AddLast(int.Parse(csv[1]));
                     //GameContent.partyCharacters.equipment.Last.Value.AddLast(int.Parse(csv[1]))
